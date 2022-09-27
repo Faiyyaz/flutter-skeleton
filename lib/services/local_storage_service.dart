@@ -2,6 +2,7 @@ import 'package:encrypt/encrypt.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 
 import '../enums/log_event.dart';
+import '../utilities/constants.dart';
 import '../utilities/custom_logger.dart';
 
 const kTokenKey = 'token';
@@ -28,10 +29,11 @@ class LocalStorageService {
     return encrypter.encrypt(value, iv: iv);
   }
 
-  String decrypt(dynamic value) {
+  String decrypt(String value) {
     Encrypter encrypter = getEncryptor();
     IV iv = IV.fromLength(16);
-    return encrypter.decrypt(value, iv: iv);
+    final Encrypted encrypted = Encrypted.fromBase64(value);
+    return encrypter.decrypt(encrypted, iv: iv);
   }
 
   Future<dynamic> getValue({
@@ -42,29 +44,8 @@ class LocalStorageService {
       key,
     );
 
-    /// Integer preference
-    int? intPreference = await _rxSharedPreferences.getInt(
-      key,
-    );
-
-    /// Double preference
-    double? doublePreference = await _rxSharedPreferences.getDouble(
-      key,
-    );
-
-    /// Boolean preference
-    bool? boolPreference = await _rxSharedPreferences.getBool(
-      key,
-    );
-
     if (stringPreference != null) {
       return decrypt(stringPreference);
-    } else if (intPreference != null) {
-      return decrypt(intPreference);
-    } else if (doublePreference != null) {
-      return decrypt(doublePreference);
-    } else if (boolPreference != null) {
-      return decrypt(boolPreference);
     } else {
       return null;
     }
@@ -98,6 +79,17 @@ class LocalStorageService {
   Future<bool> clear() async {
     try {
       await _rxSharedPreferences.clear();
+      Set<String> keys = await _rxSharedPreferences.getKeys();
+      if (keys.isNotEmpty) {
+        for (var key in keys) {
+          if (key != kThemeMode) {
+            await _rxSharedPreferences.remove(key);
+          }
+        }
+      } else {
+        await _rxSharedPreferences.clear();
+      }
+
       return true;
     } on Exception catch (e) {
       CustomLogger.logEvent(

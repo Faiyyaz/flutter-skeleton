@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utilities/ui_constants.dart';
 
 import '../../components/button/custom_text_button.dart';
 import '../../components/text/custom_text.dart';
@@ -21,6 +22,7 @@ class HomeScreenState extends BaseState<HomeScreen> with BasicPage {
       appBar: AppBar(
         title: const CustomText(
           text: 'Home',
+          color: kWhiteColor,
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),

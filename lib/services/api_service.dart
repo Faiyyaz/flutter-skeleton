@@ -64,6 +64,7 @@ class APIService {
           if (token != null) {
             options.headers.addAll({'Authorization': 'Bearer $token'});
           }
+          return handler.next(options);
         },
         onError: (error, handler) async {
           if (error.response?.statusCode == 401) {
